@@ -1,0 +1,17 @@
+{
+  "name": "github-visualization",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@octokit/rest": "^18.0.9",
+    "d3": "^6.2.0",
+    "next": "10.0.2",
+    "react": "17.0.1",
+    "react-dom": "17.0.1"
+  }
+}
