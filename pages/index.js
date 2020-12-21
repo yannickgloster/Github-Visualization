@@ -1,21 +1,8 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
-import { Octokit } from "@octokit/rest";
-
-async function get_github() {
-  const octokit = new Octokit({
-    auth: process.env.GITHUB_API_KEY,
-  });
-
-  const data = await octokit.repos.get({
-    owner: "octokit",
-    repo: "rest.js",
-  });
-  console.log(data);
-}
+import User from "../components/user";
 
 export default function Home() {
-  get_github();
   return (
     <div className={styles.container}>
       <Head>
@@ -28,10 +15,9 @@ export default function Home() {
           <a href="https://github.com/">GitHub</a> Visualization
         </h1>
 
-        <p className={styles.description}>
-          Get started by editing{" "}
-          <code className={styles.code}>pages/index.js</code>
-        </p>
+        <div className={styles.description}>
+          <User />
+        </div>
 
         <div className={styles.grid}>
           <a href="https://nextjs.org/docs" className={styles.card}>
