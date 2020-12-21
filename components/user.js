@@ -5,13 +5,12 @@ class User extends React.Component {
   constructor(props) {
     super(props);
     this.state = { value: "", data: null };
-    this.request = {};
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  async get_github(user) {
+  async get_github_user(user) {
     const octokit = new Octokit({
       auth: process.env.GITHUB_API_KEY,
     });
@@ -19,7 +18,8 @@ class User extends React.Component {
     const data = await octokit.users.getByUsername({
       username: user,
     });
-    return data;
+
+    await this.setState({ data: data["data"]["avatar_url"] });
   }
 
   handleChange(event) {
@@ -28,9 +28,7 @@ class User extends React.Component {
 
   async handleSubmit(event) {
     event.preventDefault();
-    this.request = await this.get_github(this.state.value);
-    this.setState({ data: this.request["data"]["avatar_url"] });
-    console.log(this.state);
+    await this.get_github_user(this.state.value);
   }
 
   render() {
