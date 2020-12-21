@@ -2,20 +2,20 @@ import Head from "next/head";
 import styles from "../styles/Home.module.css";
 import { Octokit } from "@octokit/rest";
 
-export default function Home() {
+async function get_github() {
   const octokit = new Octokit({
     auth: process.env.GITHUB_API_KEY,
   });
 
-  async () => {
-    const { data: pullRequest } = await octokit.pulls.get({
-      owner: "octokit",
-      repo: "rest.js",
-      pull_number: 123,
-    });
-    console.log(pullRequest);
-  };
+  const data = await octokit.repos.get({
+    owner: "octokit",
+    repo: "rest.js",
+  });
+  console.log(data);
+}
 
+export default function Home() {
+  get_github();
   return (
     <div className={styles.container}>
       <Head>
