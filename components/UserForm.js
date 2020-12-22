@@ -1,7 +1,8 @@
 import React from "react";
 import { Octokit } from "@octokit/rest";
+import styles from "./UserForm.module.css";
 
-class User extends React.Component {
+class UserForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = { value: "", data: null };
@@ -19,7 +20,7 @@ class User extends React.Component {
       username: user,
     });
 
-    await this.setState({ data: data["data"]["avatar_url"] });
+    this.setState({ data: data["data"]["name"] });
   }
 
   handleChange(event) {
@@ -36,7 +37,8 @@ class User extends React.Component {
       <div>
         <form onSubmit={this.handleSubmit}>
           <label>
-            Github Account:{" "}
+            Have a drop down here for the different inputs (User & repo, user,
+            org) <br /> Github Account:{" "}
             <input
               type="text"
               value={this.state.value}
@@ -45,12 +47,10 @@ class User extends React.Component {
           </label>
           <input type="submit" value="Submit" />
         </form>
-        {this.state.data != null && (
-          <img src={this.state.data} alt="Profile Image" />
-        )}
+        {this.state.data != null && <p>Loaded {this.state.data}</p>}
       </div>
     );
   }
 }
 
-export default User;
+export default UserForm;
