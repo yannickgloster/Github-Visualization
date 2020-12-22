@@ -1,6 +1,6 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
-import UserForm from "../components/UserForm";
+import UserForm from "../components/Form";
 import UserCard from "../components/UserCard";
 
 export default function Home() {
@@ -19,7 +19,7 @@ export default function Home() {
         <div className={styles.description}>
           <UserForm />
         </div>
-        <UserCard
+        {/* <UserCard
           username="yannickgloster"
           profile_url="https://github.com/yannickgloster"
           image_url="https://avatars0.githubusercontent.com/u/19475841?v=4"
@@ -33,7 +33,7 @@ export default function Home() {
           followers={34}
           following={33}
           created_at="2016-05-19T17:01:09Z"
-        />
+        /> */}
       </main>
 
       <footer className={styles.footer}>
@@ -42,13 +42,13 @@ export default function Home() {
           <img
             src="/github-octocat.svg"
             alt="GitHub Octocat Logo"
-            className={styles.logo_github}
+            className={styles.logoGithub}
           />
           +
           <img
             src="/vercel.svg"
             alt="Vercel Logo"
-            className={styles.logo_vercel}
+            className={styles.logoVercel}
           />
         </a>
       </footer>
