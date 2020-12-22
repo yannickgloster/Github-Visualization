@@ -5,7 +5,7 @@ import styles from "./Form.module.css";
 class Form extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { input1: "", input2: "", dropdown: "" };
+    this.state = { input1: "", input2: "", dropdown: "user" };
 
     this.input1HandleChange = this.input1HandleChange.bind(this);
     this.input2HandleChange = this.input2HandleChange.bind(this);
@@ -39,7 +39,9 @@ class Form extends React.Component {
 
   async handleSubmit(event) {
     event.preventDefault();
-    await this.get_github_user(this.state.value);
+    if (this.state.dropdown === "user") {
+      await this.get_github_user(this.state.input1);
+    }
   }
 
   render() {
@@ -74,7 +76,6 @@ class Form extends React.Component {
           </label>
           <input type="submit" value="Submit" />
         </form>
-        {this.state.data != null && <p>Loaded {this.state.data}</p>}
       </div>
     );
   }
