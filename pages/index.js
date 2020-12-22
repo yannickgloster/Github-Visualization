@@ -37,14 +37,16 @@ export default function Home() {
       </main>
 
       <footer className={styles.footer}>
+        Powered by{" "}
         <a href="https://github.com" target="_blank" rel="noopener noreferrer">
-          Powered by{" "}
           <img
             src="/github-octocat.svg"
             alt="GitHub Octocat Logo"
             className={styles.logoGithub}
           />
-          +
+        </a>
+        +
+        <a href="https://vercel.com/" target="_blank" rel="noopener noreferrer">
           <img
             src="/vercel.svg"
             alt="Vercel Logo"
