@@ -1,8 +1,20 @@
-.flex-container {
+.outerContainer {
   display: flex;
-  flex-direction: row;
 }
 
-.profile {
+.innerContainer {
+}
+
+.item {
+  display: flex;
+}
+
+.icon {
+  width: 1em;
+  margin-right: 5px;
+}
+
+.profile_img {
   border-radius: 50%;
+  filter: drop-shadow(0 0.2rem 0.25rem rgba(0, 0, 0, 0.2));
 }
