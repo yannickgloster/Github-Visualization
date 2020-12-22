@@ -11,7 +11,11 @@ class UserCard extends React.Component {
   render() {
     return (
       <div>
-        <img src={this.props.image_url} alt="Profile Image" />
+        <img
+          className={styles.profile}
+          src={this.props.image_url}
+          alt="Profile Image"
+        />
         <h1>{this.props.name}</h1>
         <h2>
           <a href={this.props.profile_url} target="_blank">
