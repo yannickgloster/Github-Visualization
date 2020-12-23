@@ -22,7 +22,7 @@ class Form extends React.Component {
       username: user,
     });
 
-    console.info(data);
+    return data;
   }
 
   handleDropdown(event) {
@@ -40,7 +40,15 @@ class Form extends React.Component {
   async handleSubmit(event) {
     event.preventDefault();
     if (this.state.dropdown === "user") {
-      await this.get_github_user(this.state.input1);
+      const github_user = await this.get_github_user(this.state.input1);
+      const github_user_contributions = await fetch(
+        "/api/contributions?user=" + this.state.input1,
+        {
+          method: "GET",
+        }
+      );
+      console.log(await github_user);
+      console.log(await github_user_contributions.json());
     }
   }
 

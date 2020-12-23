@@ -1,4 +1,4 @@
-## `.env.local`
+## `.env`
 
 ```
 GITHUB_API_KEY=<Your Github Personal Access Token>
