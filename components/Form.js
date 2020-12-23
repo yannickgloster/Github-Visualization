@@ -149,7 +149,7 @@ class Form extends React.Component {
         </form>
         {this.state.calendar_data.length > 0 && (
           <div className={styles.data}>
-            <h4>2020 User Contributions</h4>
+            <h4>{new Date().getFullYear()} User Contributions</h4>
             <ResponsiveCalendar
               data={this.state.calendar_data}
               from={new Date(2020, 0, 1)}
