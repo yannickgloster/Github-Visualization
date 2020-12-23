@@ -46,6 +46,7 @@ class Form extends React.Component {
   async handleSubmit(event) {
     event.preventDefault();
     if (this.state.dropdown === "user") {
+      this.setState({ calendar_data: [] });
       const github_user = await this.get_github_user(this.state.input1);
       const github_user_contributions_request = await fetch(
         "/api/contributions?user=" + this.state.input1,
@@ -111,7 +112,7 @@ class Form extends React.Component {
               from={new Date(2020, 0, 1)}
               to={new Date(2020, 11, 31)}
               emptyColor="#eeeeee"
-              colors={["#61cdbb", "#97e3d5", "#e8c1a0", "#f47560"]}
+              colors={["#C5E8B7", "#ABE098", "#83D475", "#57C84D", "#2EB62C"]}
               margin={{ top: 40, right: 40, bottom: 40, left: 40 }}
               yearSpacing={40}
               monthBorderColor="#ffffff"
