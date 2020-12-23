@@ -1,7 +1,7 @@
 import React from "react";
 import { Octokit } from "@octokit/rest";
 import styles from "./Form.module.css";
-import { Calendar } from "@nivo/calendar";
+import { ResponsiveCalendar } from "@nivo/calendar";
 
 class Form extends React.Component {
   constructor(props) {
@@ -104,11 +104,9 @@ class Form extends React.Component {
           <input type="submit" value="Submit" />
         </form>
         {this.state.calendar_data.length > 0 && (
-          <div>
+          <div className={styles.data}>
             <h4>2020 User Contributions</h4>
-            <Calendar
-              height={200}
-              width={1000}
+            <ResponsiveCalendar
               data={this.state.calendar_data}
               from={new Date(2020, 0, 1)}
               to={new Date(2020, 11, 31)}

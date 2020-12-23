@@ -1,3 +1,8 @@
 .form_element {
   margin: 10px;
 }
+
+.data {
+  height: 200px;
+  width: 1000px;
+}
