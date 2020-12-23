@@ -1,11 +1,17 @@
 import React from "react";
 import { Octokit } from "@octokit/rest";
 import styles from "./Form.module.css";
+import { Calendar } from "@nivo/calendar";
 
 class Form extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { input1: "", input2: "", dropdown: "user" };
+    this.state = {
+      input1: "",
+      input2: "",
+      dropdown: "user",
+      calendar_data: [],
+    };
 
     this.input1HandleChange = this.input1HandleChange.bind(this);
     this.input2HandleChange = this.input2HandleChange.bind(this);
@@ -41,14 +47,27 @@ class Form extends React.Component {
     event.preventDefault();
     if (this.state.dropdown === "user") {
       const github_user = await this.get_github_user(this.state.input1);
-      const github_user_contributions = await fetch(
+      const github_user_contributions_request = await fetch(
         "/api/contributions?user=" + this.state.input1,
         {
           method: "GET",
         }
       );
-      console.log(await github_user);
-      console.log(await github_user_contributions.json());
+      const github_user_contributions = await github_user_contributions_request.json();
+      github_user_contributions["data"]["user"]["contributionsCollection"][
+        "contributionCalendar"
+      ]["weeks"].forEach((week) => {
+        week["contributionDays"].forEach((day) => {
+          if (day["contributionCount"] > 0) {
+            const cal_object = {
+              day: day["date"],
+              value: day["contributionCount"],
+            };
+            var joined = this.state.calendar_data.concat(cal_object);
+            this.setState({ calendar_data: joined });
+          }
+        });
+      });
     }
   }
 
@@ -84,6 +103,37 @@ class Form extends React.Component {
           </label>
           <input type="submit" value="Submit" />
         </form>
+        {this.state.calendar_data.length > 0 && (
+          <div>
+            <h4>2020 User Contributions</h4>
+            <Calendar
+              height={200}
+              width={1000}
+              data={this.state.calendar_data}
+              from={new Date(2020, 0, 1)}
+              to={new Date(2020, 11, 31)}
+              emptyColor="#eeeeee"
+              colors={["#61cdbb", "#97e3d5", "#e8c1a0", "#f47560"]}
+              margin={{ top: 40, right: 40, bottom: 40, left: 40 }}
+              yearSpacing={40}
+              monthBorderColor="#ffffff"
+              dayBorderWidth={2}
+              dayBorderColor="#ffffff"
+              legends={[
+                {
+                  anchor: "bottom-right",
+                  direction: "row",
+                  translateY: 36,
+                  itemCount: 4,
+                  itemWidth: 42,
+                  itemHeight: 36,
+                  itemsSpacing: 14,
+                  itemDirection: "right-to-left",
+                },
+              ]}
+            />
+          </div>
+        )}
       </div>
     );
   }

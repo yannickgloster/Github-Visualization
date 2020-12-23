@@ -13,11 +13,9 @@ export default async (req, res) => {
               name
               contributionsCollection {
                 contributionCalendar {
-                  colors
                   totalContributions
                   weeks {
                     contributionDays {
-                      color
                       contributionCount
                       date
                       weekday
