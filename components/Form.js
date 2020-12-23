@@ -10,12 +10,14 @@ class Form extends React.Component {
       input1: "",
       input2: "",
       dropdown: "user",
+      preset: "yannick+account",
       calendar_data: [],
     };
 
     this.input1HandleChange = this.input1HandleChange.bind(this);
     this.input2HandleChange = this.input2HandleChange.bind(this);
     this.handleDropdown = this.handleDropdown.bind(this);
+    this.handlePresetDropdown = this.handlePresetDropdown.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
@@ -35,6 +37,10 @@ class Form extends React.Component {
     this.setState({ dropdown: event.target.value });
   }
 
+  handlePresetDropdown(event) {
+    this.setState({ preset: event.target.value });
+  }
+
   input1HandleChange(event) {
     this.setState({ input1: event.target.value });
   }
@@ -45,11 +51,27 @@ class Form extends React.Component {
 
   async handleSubmit(event) {
     event.preventDefault();
-    if (this.state.dropdown === "user") {
+    let preset_select = "";
+    let input1 = this.state.input1;
+    let input2 = this.state.input2;
+    if (this.state.dropdown === "presets") {
+      if (this.state.preset === "yannick+account") {
+        input1 = "yannickgloster";
+        preset_select = "user";
+      } else if (this.state.preset === "brian+account") {
+        input1 = "branflakes6";
+        preset_select = "user";
+      } else if (this.state.preset === "pinaqui+account") {
+        input1 = "eoinpinaqui";
+        preset_select = "user";
+      }
+    }
+
+    if (this.state.dropdown === "user" || preset_select === "user") {
       this.setState({ calendar_data: [] });
-      const github_user = await this.get_github_user(this.state.input1);
+      const github_user = await this.get_github_user(input1);
       const github_user_contributions_request = await fetch(
-        "/api/contributions?user=" + this.state.input1,
+        "/api/contributions?user=" + input1,
         {
           method: "GET",
         }
@@ -85,14 +107,18 @@ class Form extends React.Component {
           >
             <option value="user">Github User</option>
             <option value="user+repo">Github User & Repo</option>
+            <option value="presets">Presets</option>
           </select>
           <label>
-            <input
-              type="text"
-              value={this.state.input1}
-              onChange={this.input1HandleChange}
-              className={styles.form_element}
-            />
+            {(this.state.dropdown === "user+repo" ||
+              this.state.dropdown === "user") && (
+              <input
+                type="text"
+                value={this.state.input1}
+                onChange={this.input1HandleChange}
+                className={styles.form_element}
+              />
+            )}
             {this.state.dropdown === "user+repo" && (
               <input
                 type="text"
@@ -100,6 +126,23 @@ class Form extends React.Component {
                 onChange={this.input2HandleChange}
                 className={styles.form_element}
               />
+            )}
+            {this.state.dropdown === "presets" && (
+              <select
+                name="preset_select"
+                id="preset_select"
+                value={this.state.preset}
+                onChange={this.handlePresetDropdown}
+                className={styles.form_element}
+              >
+                <option value="yannick+account">
+                  Yannick's GitHub Account
+                </option>
+                <option value="brian+account">Brian's GitHub Account</option>
+                <option value="pinaqui+account">
+                  Pinaqui's GitHub Account
+                </option>
+              </select>
             )}
           </label>
           <input type="submit" value="Submit" />
