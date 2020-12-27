@@ -4,7 +4,7 @@ export default async (req, res) => {
   } = req;
 
   const headers = {
-    Authorization: `bearer ${process.env.GITHUB_API_KEY}`,
+    Authorization: `bearer ${process.env.NEXT_PUBLIC_GITHUB_API_KEY}`,
   };
 
   const body = {

@@ -2,7 +2,12 @@
   margin: 10px;
 }
 
-.data {
+.contributions_data {
   height: 200px;
+  width: 1000px;
+}
+
+.network_data {
+  height: 1000px;
   width: 1000px;
 }

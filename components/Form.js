@@ -2,6 +2,7 @@ import React from "react";
 import { Octokit } from "@octokit/rest";
 import styles from "./Form.module.css";
 import { ResponsiveCalendar } from "@nivo/calendar";
+import { ResponsiveNetwork } from "@nivo/network";
 
 class Form extends React.Component {
   constructor(props) {
@@ -12,6 +13,8 @@ class Form extends React.Component {
       dropdown: "user",
       preset: "yannick+account",
       calendar_data: [],
+      nodes: [],
+      links: [],
     };
 
     this.input1HandleChange = this.input1HandleChange.bind(this);
@@ -19,18 +22,6 @@ class Form extends React.Component {
     this.handleDropdown = this.handleDropdown.bind(this);
     this.handlePresetDropdown = this.handlePresetDropdown.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-  }
-
-  async get_github_user(user) {
-    const octokit = new Octokit({
-      auth: process.env.GITHUB_API_KEY,
-    });
-
-    const data = await octokit.users.getByUsername({
-      username: user,
-    });
-
-    return data;
   }
 
   handleDropdown(event) {
@@ -47,6 +38,17 @@ class Form extends React.Component {
 
   input2HandleChange(event) {
     this.setState({ input2: event.target.value });
+  }
+
+  containsObject(obj, list) {
+    var x;
+    for (x in list) {
+      if (list.hasOwnProperty(x) && list[x] === obj) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   async handleSubmit(event) {
@@ -68,8 +70,95 @@ class Form extends React.Component {
     }
 
     if (this.state.dropdown === "user" || preset_select === "user") {
-      this.setState({ calendar_data: [] });
-      const github_user = await this.get_github_user(input1);
+      this.setState({ calendar_data: [], nodes: [], links: [] });
+      const octokit = new Octokit({
+        auth: process.env.NEXT_PUBLIC_GITHUB_API_KEY,
+      });
+
+      // Get User Info & Network Graph
+      const github_user = await octokit.users.getByUsername({
+        username: input1,
+      });
+
+      // put in paginator
+      const github_followers = await octokit.users.listFollowersForUser({
+        username: input1,
+      });
+
+      this.setState({
+        nodes: [
+          {
+            id: github_user["data"]["login"],
+            radius: 8,
+            depth: 1,
+            color: "rgb(0, 0, 0)",
+          },
+        ],
+      });
+
+      // Refactor to duplication
+      github_followers["data"].forEach(async (follower) => {
+        const child_follower = await octokit.users.listFollowersForUser({
+          username: follower["login"],
+        });
+        child_follower["data"].forEach((child) => {
+          if (!this.state.nodes.some((node) => node.id === child["login"])) {
+            const node_object = {
+              id: child["login"],
+              radius: 8,
+              depth: 1,
+              color:
+                "rgb(" +
+                Math.floor(Math.random() * 256) +
+                ", " +
+                Math.floor(Math.random() * 256) +
+                ", " +
+                Math.floor(Math.random() * 256) +
+                ")",
+            };
+            var joined_nodes = this.state.nodes.concat(node_object);
+            this.setState({ nodes: joined_nodes });
+          }
+
+          const link = {
+            source: follower["login"],
+            target: child["login"],
+            distance: 100,
+          };
+
+          var joined_links = this.state.links.concat(link);
+          this.setState({ links: joined_links });
+        });
+
+        if (!this.state.nodes.some((node) => node.id === follower["login"])) {
+          const node_object = {
+            id: follower["login"],
+            radius: 8,
+            depth: 1,
+            color:
+              "rgb(" +
+              Math.floor(Math.random() * 256) +
+              ", " +
+              Math.floor(Math.random() * 256) +
+              ", " +
+              Math.floor(Math.random() * 256) +
+              ")",
+          };
+          var joined_nodes = this.state.nodes.concat(node_object);
+          this.setState({ nodes: joined_nodes });
+        }
+
+        const link = {
+          source: github_user["data"]["login"],
+          target: follower["login"],
+          distance: 100,
+        };
+
+        var joined_links = this.state.links.concat(link);
+        this.setState({ links: joined_links });
+      });
+
+      // Get Github Contributions
       const github_user_contributions_request = await fetch(
         "/api/contributions?user=" + input1,
         {
@@ -148,7 +237,7 @@ class Form extends React.Component {
           <input type="submit" value="Submit" />
         </form>
         {this.state.calendar_data.length > 0 && (
-          <div className={styles.data}>
+          <div className={styles.contributions_data}>
             <h4>{new Date().getFullYear()} User Contributions</h4>
             <ResponsiveCalendar
               data={this.state.calendar_data}
@@ -173,6 +262,28 @@ class Form extends React.Component {
                   itemDirection: "right-to-left",
                 },
               ]}
+            />
+          </div>
+        )}
+        {this.state.calendar_data.length > 0 && (
+          <div className={styles.network_data}>
+            <h4>User Connections</h4>
+            <ResponsiveNetwork
+              nodes={this.state.nodes}
+              links={this.state.links}
+              margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+              repulsivity={100}
+              iterations={60}
+              nodeColor={function (e) {
+                return e.color;
+              }}
+              nodeBorderWidth={1}
+              nodeBorderColor={{ from: "color", modifiers: [["darker", 0.8]] }}
+              linkThickness={function (e) {
+                return 2 * (2 - e.source.depth);
+              }}
+              motionStiffness={160}
+              motionDamping={12}
             />
           </div>
         )}
