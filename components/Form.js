@@ -85,16 +85,16 @@ class Form extends React.Component {
         username: input1,
       });
 
-      this.setState({
-        nodes: [
-          {
-            id: github_user["data"]["login"],
-            radius: 8,
-            depth: 1,
-            color: "rgb(0, 0, 0)",
-          },
-        ],
-      });
+      let nodes = [
+        {
+          id: github_user["data"]["login"],
+          radius: 14,
+          depth: 1,
+          color: "rgb(255, 0, 0)",
+        },
+      ];
+
+      let links = [];
 
       // Refactor to duplication
       github_followers["data"].forEach(async (follower) => {
@@ -102,11 +102,11 @@ class Form extends React.Component {
           username: follower["login"],
         });
         child_follower["data"].forEach((child) => {
-          if (!this.state.nodes.some((node) => node.id === child["login"])) {
+          if (!nodes.some((node) => node.id === child["login"])) {
             const node_object = {
               id: child["login"],
-              radius: 8,
-              depth: 1,
+              radius: 10,
+              depth: 3,
               color:
                 "rgb(" +
                 Math.floor(Math.random() * 256) +
@@ -116,8 +116,7 @@ class Form extends React.Component {
                 Math.floor(Math.random() * 256) +
                 ")",
             };
-            var joined_nodes = this.state.nodes.concat(node_object);
-            this.setState({ nodes: joined_nodes });
+            nodes = nodes.concat(node_object);
           }
 
           const link = {
@@ -126,15 +125,14 @@ class Form extends React.Component {
             distance: 100,
           };
 
-          var joined_links = this.state.links.concat(link);
-          this.setState({ links: joined_links });
+          links = links.concat(link);
         });
 
-        if (!this.state.nodes.some((node) => node.id === follower["login"])) {
+        if (!nodes.some((node) => node.id === follower["login"])) {
           const node_object = {
             id: follower["login"],
-            radius: 8,
-            depth: 1,
+            radius: 10,
+            depth: 2,
             color:
               "rgb(" +
               Math.floor(Math.random() * 256) +
@@ -144,8 +142,7 @@ class Form extends React.Component {
               Math.floor(Math.random() * 256) +
               ")",
           };
-          var joined_nodes = this.state.nodes.concat(node_object);
-          this.setState({ nodes: joined_nodes });
+          nodes = nodes.concat(node_object);
         }
 
         const link = {
@@ -154,8 +151,8 @@ class Form extends React.Component {
           distance: 100,
         };
 
-        var joined_links = this.state.links.concat(link);
-        this.setState({ links: joined_links });
+        links = links.concat(link);
+        this.setState({ nodes: nodes, links: links });
       });
 
       // Get Github Contributions
@@ -239,6 +236,9 @@ class Form extends React.Component {
         {this.state.calendar_data.length > 0 && (
           <div className={styles.contributions_data}>
             <h4>{new Date().getFullYear()} User Contributions</h4>
+            <p>
+              Hover over day to see the number of github activities on that day.
+            </p>
             <ResponsiveCalendar
               data={this.state.calendar_data}
               from={new Date(2020, 0, 1)}
@@ -265,25 +265,31 @@ class Form extends React.Component {
             />
           </div>
         )}
-        {this.state.calendar_data.length > 0 && (
+        {this.state.nodes.length > 0 && (
           <div className={styles.network_data}>
-            <h4>User Connections</h4>
+            <h4>User Followers at 2 degrees</h4>
+            <p>
+              Hover over each node to see the username of the person. The
+              diminishing thickness of the line shows the depth of the node.
+            </p>
             <ResponsiveNetwork
               nodes={this.state.nodes}
               links={this.state.links}
               margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
-              repulsivity={100}
-              iterations={60}
+              repulsivity={150}
+              iterations={20}
               nodeColor={function (e) {
                 return e.color;
               }}
               nodeBorderWidth={1}
               nodeBorderColor={{ from: "color", modifiers: [["darker", 0.8]] }}
               linkThickness={function (e) {
-                return 2 * (2 - e.source.depth);
+                return 2 * (4 - e.source.depth);
               }}
               motionStiffness={160}
               motionDamping={12}
+              distanceMax={200}
+              distanceMin={20}
             />
           </div>
         )}
