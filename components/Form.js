@@ -15,6 +15,7 @@ class Form extends React.Component {
       calendar_data: [],
       nodes: [],
       links: [],
+      user_img: "",
     };
 
     this.input1HandleChange = this.input1HandleChange.bind(this);
@@ -70,7 +71,13 @@ class Form extends React.Component {
     }
 
     if (this.state.dropdown === "user" || preset_select === "user") {
-      this.setState({ calendar_data: [], nodes: [], links: [] });
+      this.setState({
+        calendar_data: [],
+        line_data: [],
+        nodes: [],
+        links: [],
+        user_img: "",
+      });
       const octokit = new Octokit({
         auth: process.env.NEXT_PUBLIC_GITHUB_API_KEY,
       });
@@ -79,6 +86,13 @@ class Form extends React.Component {
       const github_user = await octokit.users.getByUsername({
         username: input1,
       });
+
+      this.setState({
+        user_img:
+          "https://github-readme-stats.vercel.app/api?username=" + input1,
+      });
+
+      console.log(github_user);
 
       // put in paginator
       const github_followers = await octokit.users.listFollowersForUser({
@@ -172,8 +186,10 @@ class Form extends React.Component {
               day: day["date"],
               value: day["contributionCount"],
             };
-            var joined = this.state.calendar_data.concat(cal_object);
-            this.setState({ calendar_data: joined });
+            var joined_cal = this.state.calendar_data.concat(cal_object);
+            this.setState({
+              calendar_data: joined_cal,
+            });
           }
         });
       });
@@ -233,6 +249,11 @@ class Form extends React.Component {
           </label>
           <input type="submit" value="Submit" />
         </form>
+        {this.state.user_img.length > 0 && (
+          <div>
+            <img src={this.state.user_img} />
+          </div>
+        )}
         {this.state.calendar_data.length > 0 && (
           <div className={styles.contributions_data}>
             <h4>{new Date().getFullYear()} User Contributions</h4>
