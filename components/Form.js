@@ -18,6 +18,7 @@ class Form extends React.Component {
       links: [],
       user_img: "",
       pie_data: [],
+      contribution_year: new Date().getFullYear(),
     };
 
     this.input1HandleChange = this.input1HandleChange.bind(this);
@@ -25,6 +26,7 @@ class Form extends React.Component {
     this.handleDropdown = this.handleDropdown.bind(this);
     this.handlePresetDropdown = this.handlePresetDropdown.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.contributionYear = this.contributionYear.bind(this);
   }
 
   handleDropdown(event) {
@@ -41,6 +43,10 @@ class Form extends React.Component {
 
   input2HandleChange(event) {
     this.setState({ input2: event.target.value });
+  }
+
+  contributionYear(event) {
+    this.setState({ contribution_year: event.target.value });
   }
 
   async handleSubmit(event) {
@@ -333,11 +339,27 @@ class Form extends React.Component {
         )}
         {this.state.calendar_data.length > 0 && (
           <div className={styles.contributions_data}>
-            <h4>{new Date().getFullYear()} User Contributions</h4>
+            <h4>
+              <select
+                name="year"
+                id="year"
+                value={this.state.contribution_year}
+                onChange={this.contributionYear}
+                className={styles.form_element}
+              >
+                <option value={new Date().getFullYear()}>
+                  {new Date().getFullYear()}
+                </option>
+                <option value={new Date().getFullYear() - 1}>
+                  {new Date().getFullYear() - 1}
+                </option>
+              </select>{" "}
+              User Contributions
+            </h4>
             <ResponsiveCalendar
               data={this.state.calendar_data}
-              from={new Date(new Date().getFullYear(), 0, 1)}
-              to={new Date(new Date().getFullYear(), 11, 31)}
+              from={new Date(this.state.contribution_year, 0, 1)}
+              to={new Date(this.state.contribution_year, 11, 31)}
               emptyColor="#eeeeee"
               colors={["#C5E8B7", "#ABE098", "#83D475", "#57C84D", "#2EB62C"]}
               margin={{ top: 40, right: 40, bottom: 40, left: 40 }}
