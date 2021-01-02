@@ -411,6 +411,16 @@ class Form extends React.Component {
               motionDamping={12}
               distanceMax={200}
               distanceMin={20}
+              tooltip={(node) => {
+                return (
+                  <div>
+                    <div>
+                      User:
+                      <strong style={{ color: node.color }}>{node.id}</strong>
+                    </div>
+                  </div>
+                );
+              }}
             />
           </div>
         )}
