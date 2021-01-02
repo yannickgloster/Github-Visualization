@@ -4,6 +4,7 @@ import styles from "./Form.module.css";
 import { ResponsiveCalendar } from "@nivo/calendar";
 import { ResponsiveNetwork } from "@nivo/network";
 import { ResponsivePie } from "@nivo/pie";
+import { ResponsiveLine } from "@nivo/line";
 
 class Form extends React.Component {
   constructor(props) {
@@ -17,9 +18,13 @@ class Form extends React.Component {
       nodes: [],
       links: [],
       user_img: "",
+      user_url: "",
       pie_data: [],
+      line_data: [],
       contribution_year: new Date().getFullYear(),
       search_error: false,
+      repo_img: "",
+      repo_url: "",
     };
 
     this.input1HandleChange = this.input1HandleChange.bind(this);
@@ -65,54 +70,67 @@ class Form extends React.Component {
       } else if (this.state.preset === "pinaqui+account") {
         input1 = "eoinpinaqui";
         preset_select = "user";
+      } else if (this.state.preset === "yannick+account+repo") {
+        input1 = "yannickgloster";
+        input2 = "discord-10man";
+        preset_select = "user+repo";
       }
     }
 
-    if (this.state.dropdown === "user" || preset_select === "user") {
-      this.setState({
-        search_error: false,
-        calendar_data: [],
-        line_data: [],
-        nodes: [],
-        links: [],
-        user_img: "",
-        pie_data: [
-          {
-            id: "morning",
-            label: "Morning (5am - 10am)",
-            value: 0,
-            color: "#FAB195",
-          },
-          {
-            id: "day",
-            label: "Daytime (11am - 4pm)",
-            value: 0,
-            color: "#C06C84",
-          },
-          {
-            id: "evening",
-            label: "Evening (5pm - 9pm)",
-            value: 0,
-            color: "#6CB7B",
-          },
-          {
-            id: "night",
-            label: "Nighttime (10pm - 4am)",
-            value: 0,
-            color: "#355C7D",
-          },
-        ],
-      });
+    this.setState({
+      search_error: false,
+      calendar_data: [],
+      line_data: [],
+      nodes: [],
+      links: [],
+      user_img: "",
+      repo_img: "",
+      pie_data: [],
+      repo_url: "",
+      user_url: "",
+    });
 
+    if (this.state.dropdown === "user" || preset_select === "user") {
       const octokit = new Octokit({
         auth: process.env.NEXT_PUBLIC_GITHUB_API_KEY,
       });
 
       // Get User Info & Network Graph
       try {
+        this.setState({
+          pie_data: [
+            {
+              id: "morning",
+              label: "Morning (5am - 10am)",
+              value: 0,
+              color: "#FAB195",
+            },
+            {
+              id: "day",
+              label: "Daytime (11am - 4pm)",
+              value: 0,
+              color: "#C06C84",
+            },
+            {
+              id: "evening",
+              label: "Evening (5pm - 9pm)",
+              value: 0,
+              color: "#6CB7B",
+            },
+            {
+              id: "night",
+              label: "Nighttime (10pm - 4am)",
+              value: 0,
+              color: "#355C7D",
+            },
+          ],
+        });
+
         const github_user = await octokit.users.getByUsername({
           username: input1,
         });
+
+        this.setState({ user_url: github_user["data"]["html_url"] });
 
         const events = await octokit.paginate(
           "GET /users/" + input1 + "/events"
@@ -240,6 +258,34 @@ class Form extends React.Component {
       } catch (e) {
         this.setState({ search_error: true });
       }
+    } else if (
+      this.state.dropdown === "user+repo" ||
+      preset_select === "user+repo"
+    ) {
+      console.log("here");
+      const octokit = new Octokit({
+        auth: process.env.NEXT_PUBLIC_GITHUB_API_KEY,
+      });
+
+      this.setState({
+        repo_img:
+          "https://github-readme-stats.vercel.app/api/pin/?username=" +
+          input1 +
+          "&repo=" +
+          input2,
+      });
+
+      try {
+        const repo = await octokit.repos.get({
+          owner: input1,
+          repo: input2,
+        });
+
+        this.setState({ repo_url: repo["data"]["html_url"] });
+        console.log(this.state.repo_url);
+      } catch (e) {
+        this.setState({ search_error: true });
+      }
     }
   }
 
@@ -261,20 +307,26 @@ class Form extends React.Component {
           <label>
             {(this.state.dropdown === "user+repo" ||
               this.state.dropdown === "user") && (
-              <input
-                type="text"
-                value={this.state.input1}
-                onChange={this.input1HandleChange}
-                className={styles.form_element}
-              />
+              <>
+                User:
+                <input
+                  type="text"
+                  value={this.state.input1}
+                  onChange={this.input1HandleChange}
+                  className={styles.form_element}
+                />
+              </>
             )}
             {this.state.dropdown === "user+repo" && (
-              <input
-                type="text"
-                value={this.state.input2}
-                onChange={this.input2HandleChange}
-                className={styles.form_element}
-              />
+              <>
+                Repo:
+                <input
+                  type="text"
+                  value={this.state.input2}
+                  onChange={this.input2HandleChange}
+                  className={styles.form_element}
+                />
+              </>
             )}
             {this.state.dropdown === "presets" && (
               <select
@@ -291,6 +343,9 @@ class Form extends React.Component {
                 <option value="pinaqui+account">
                   Pinaqui's GitHub Account
                 </option>
+                <option value="yannick+account+repo">
+                  Yannick's Discord-10man
+                </option>
               </select>
             )}
           </label>
@@ -298,7 +353,9 @@ class Form extends React.Component {
         </form>
         {this.state.user_img.length > 0 && !this.state.search_error && (
           <div>
-            <img src={this.state.user_img} />
+            <a href={this.state.user_url} target="_blank">
+              <img src={this.state.user_img} />
+            </a>
           </div>
         )}
         {this.state.pie_data.length > 0 && !this.state.search_error && (
@@ -414,14 +471,19 @@ class Form extends React.Component {
               tooltip={(node) => {
                 return (
                   <div>
-                    <div>
-                      User:
-                      <strong style={{ color: node.color }}>{node.id}</strong>
-                    </div>
+                    Username:{" "}
+                    <strong style={{ color: node.color }}>{node.id}</strong>
                   </div>
                 );
               }}
             />
+          </div>
+        )}
+        {this.state.repo_img.length > 0 && !this.state.search_error && (
+          <div>
+            <a href={this.state.repo_url} target="_blank">
+              <img src={this.state.repo_img} />
+            </a>
           </div>
         )}
         {this.state.search_error && (
