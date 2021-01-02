@@ -3,6 +3,7 @@ import { Octokit } from "@octokit/rest";
 import styles from "./Form.module.css";
 import { ResponsiveCalendar } from "@nivo/calendar";
 import { ResponsiveNetwork } from "@nivo/network";
+import { ResponsivePie } from "@nivo/pie";
 
 class Form extends React.Component {
   constructor(props) {
@@ -16,6 +17,7 @@ class Form extends React.Component {
       nodes: [],
       links: [],
       user_img: "",
+      pie_data: [],
     };
 
     this.input1HandleChange = this.input1HandleChange.bind(this);
@@ -39,17 +41,6 @@ class Form extends React.Component {
 
   input2HandleChange(event) {
     this.setState({ input2: event.target.value });
-  }
-
-  containsObject(obj, list) {
-    var x;
-    for (x in list) {
-      if (list.hasOwnProperty(x) && list[x] === obj) {
-        return true;
-      }
-    }
-
-    return false;
   }
 
   async handleSubmit(event) {
@@ -77,7 +68,34 @@ class Form extends React.Component {
         nodes: [],
         links: [],
         user_img: "",
+        pie_data: [
+          {
+            id: "morning",
+            label: "Morning (5am - 10am)",
+            value: 0,
+            color: "#FAB195",
+          },
+          {
+            id: "day",
+            label: "Daytime (11am - 4pm)",
+            value: 0,
+            color: "#C06C84",
+          },
+          {
+            id: "evening",
+            label: "Evening (5pm - 9pm)",
+            value: 0,
+            color: "#6CB7B",
+          },
+          {
+            id: "night",
+            label: "Nighttime (10pm - 4am)",
+            value: 0,
+            color: "#355C7D",
+          },
+        ],
       });
+
       const octokit = new Octokit({
         auth: process.env.NEXT_PUBLIC_GITHUB_API_KEY,
       });
@@ -87,12 +105,27 @@ class Form extends React.Component {
         username: input1,
       });
 
+      const events = await octokit.paginate("GET /users/" + input1 + "/events");
+
+      events.forEach((event) => {
+        const hour = new Date(event["created_at"]).getHours();
+        let pie = this.state.pie_data;
+        if (hour > 4 && hour <= 10) {
+          pie[0]["value"] = pie[0]["value"] + 1;
+        } else if (hour > 10 && hour <= 16) {
+          pie[1]["value"] = pie[1]["value"] + 1;
+        } else if (hour > 16 && hour <= 21) {
+          pie[2]["value"] = pie[2]["value"] + 1;
+        } else if (hour > 21 && hour <= 4) {
+          pie[3]["value"] = pie[3]["value"] + 1;
+        }
+        this.setState({ pie_data: pie });
+      });
+
       this.setState({
         user_img:
           "https://github-readme-stats.vercel.app/api?username=" + input1,
       });
-
-      console.log(github_user);
 
       // put in paginator
       const github_followers = await octokit.users.listFollowersForUser({
@@ -254,16 +287,57 @@ class Form extends React.Component {
             <img src={this.state.user_img} />
           </div>
         )}
+        {this.state.pie_data.length > 0 && (
+          <div className={styles.pie_data}>
+            <ResponsivePie
+              data={this.state.pie_data}
+              margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
+              innerRadius={0.5}
+              padAngle={0.7}
+              cornerRadius={3}
+              colors={{ scheme: "nivo" }}
+              borderWidth={1}
+              borderColor={{ from: "color", modifiers: [["darker", 0.2]] }}
+              radialLabelsSkipAngle={10}
+              radialLabelsTextColor="#333333"
+              radialLabelsLinkColor={{ from: "color" }}
+              sliceLabelsSkipAngle={10}
+              sliceLabelsTextColor="#333333"
+              legends={[
+                {
+                  anchor: "bottom",
+                  direction: "column",
+                  justify: false,
+                  translateX: 0,
+                  translateY: 75,
+                  itemsSpacing: 0,
+                  itemWidth: 100,
+                  itemHeight: 18,
+                  itemTextColor: "#999",
+                  itemDirection: "left-to-right",
+                  itemOpacity: 1,
+                  symbolSize: 18,
+                  symbolShape: "circle",
+                  effects: [
+                    {
+                      on: "hover",
+                      style: {
+                        itemTextColor: "#000",
+                      },
+                    },
+                  ],
+                },
+              ]}
+            />
+          </div>
+        )}
         {this.state.calendar_data.length > 0 && (
           <div className={styles.contributions_data}>
             <h4>{new Date().getFullYear()} User Contributions</h4>
-            <p>
-              Hover over day to see the number of github activities on that day.
-            </p>
             <ResponsiveCalendar
               data={this.state.calendar_data}
-              from={new Date(2020, 0, 1)}
-              to={new Date(2020, 11, 31)}
+              from={new Date(new Date().getFullYear(), 0, 1)}
+              to={new Date(new Date().getFullYear(), 11, 31)}
               emptyColor="#eeeeee"
               colors={["#C5E8B7", "#ABE098", "#83D475", "#57C84D", "#2EB62C"]}
               margin={{ top: 40, right: 40, bottom: 40, left: 40 }}
@@ -288,11 +362,7 @@ class Form extends React.Component {
         )}
         {this.state.nodes.length > 0 && (
           <div className={styles.network_data}>
-            <h4>User Followers at 2 degrees</h4>
-            <p>
-              Hover over each node to see the username of the person. The
-              diminishing thickness of the line shows the depth of the node.
-            </p>
+            <h4>User Followers Connections at 2 degrees</h4>
             <ResponsiveNetwork
               nodes={this.state.nodes}
               links={this.state.links}

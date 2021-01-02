@@ -1,7 +1,16 @@
+# Github Visualization tool
+
+Built by Yannick Gloster | `18308167`
+[Live Deployment](https://github-visualization.vercel.app/)
+
+This project is built in Javascript using the Next.JS Framework. It is being hosted through Vercel.
+
+This web app allows you to give your Github Username or Repository and displays statistics to determine your productivity and network.
+
 ## `.env`
 
 ```
-GITHUB_API_KEY=<Your Github Personal Access Token>
+NEXT_PUBLIC_GITHUB_API_KEY=<Your Github Personal Access Token>
 ```
 
 ## Docker
