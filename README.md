@@ -30,7 +30,7 @@ docker build -t client .
 You can then deploy the the app using the following command:
 
 ```bash
-docker build -t client . && docker run --name CLIENT_CONTAINER -p 0.0.0.0:5000:3000 client
+docker run --name CLIENT_CONTAINER -p 0.0.0.0:5000:3000 client
 ```
 
 You can then access the site at [http://localhost:5000/](http://localhost:5000/)
