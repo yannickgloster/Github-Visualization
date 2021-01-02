@@ -19,6 +19,7 @@ class Form extends React.Component {
       user_img: "",
       pie_data: [],
       contribution_year: new Date().getFullYear(),
+      search_error: false,
     };
 
     this.input1HandleChange = this.input1HandleChange.bind(this);
@@ -69,6 +70,7 @@ class Form extends React.Component {
 
     if (this.state.dropdown === "user" || preset_select === "user") {
       this.setState({
+        search_error: false,
         calendar_data: [],
         line_data: [],
         nodes: [],
@@ -107,59 +109,88 @@ class Form extends React.Component {
       });
 
       // Get User Info & Network Graph
-      const github_user = await octokit.users.getByUsername({
-        username: input1,
-      });
-
-      const events = await octokit.paginate("GET /users/" + input1 + "/events");
-
-      events.forEach((event) => {
-        const hour = new Date(event["created_at"]).getHours();
-        let pie = this.state.pie_data;
-        if (hour > 4 && hour <= 10) {
-          pie[0]["value"] = pie[0]["value"] + 1;
-        } else if (hour > 10 && hour <= 16) {
-          pie[1]["value"] = pie[1]["value"] + 1;
-        } else if (hour > 16 && hour <= 21) {
-          pie[2]["value"] = pie[2]["value"] + 1;
-        } else if (hour > 21 && hour <= 4) {
-          pie[3]["value"] = pie[3]["value"] + 1;
-        }
-        this.setState({ pie_data: pie });
-      });
-
-      this.setState({
-        user_img:
-          "https://github-readme-stats.vercel.app/api?username=" + input1,
-      });
-
-      // put in paginator
-      const github_followers = await octokit.users.listFollowersForUser({
-        username: input1,
-      });
-
-      let nodes = [
-        {
-          id: github_user["data"]["login"],
-          radius: 14,
-          depth: 1,
-          color: "rgb(255, 0, 0)",
-        },
-      ];
-
-      let links = [];
-
-      // Refactor to duplication
-      github_followers["data"].forEach(async (follower) => {
-        const child_follower = await octokit.users.listFollowersForUser({
-          username: follower["login"],
+      try {
+        const github_user = await octokit.users.getByUsername({
+          username: input1,
         });
-        child_follower["data"].forEach((child) => {
-          if (!nodes.some((node) => node.id === child["login"])) {
+
+        const events = await octokit.paginate(
+          "GET /users/" + input1 + "/events"
+        );
+
+        events.forEach((event) => {
+          const hour = new Date(event["created_at"]).getHours();
+          let pie = this.state.pie_data;
+          if (hour > 4 && hour <= 10) {
+            pie[0]["value"] = pie[0]["value"] + 1;
+          } else if (hour > 10 && hour <= 16) {
+            pie[1]["value"] = pie[1]["value"] + 1;
+          } else if (hour > 16 && hour <= 21) {
+            pie[2]["value"] = pie[2]["value"] + 1;
+          } else if (hour > 21 && hour <= 4) {
+            pie[3]["value"] = pie[3]["value"] + 1;
+          }
+          this.setState({ pie_data: pie });
+        });
+
+        this.setState({
+          user_img:
+            "https://github-readme-stats.vercel.app/api?username=" + input1,
+        });
+
+        // put in paginator
+        const github_followers = await octokit.users.listFollowersForUser({
+          username: input1,
+        });
+
+        let nodes = [
+          {
+            id: github_user["data"]["login"],
+            radius: 14,
+            depth: 1,
+            color: "rgb(255, 0, 0)",
+          },
+        ];
+
+        let links = [];
+
+        // Refactor to duplication
+        github_followers["data"].forEach(async (follower) => {
+          const child_follower = await octokit.users.listFollowersForUser({
+            username: follower["login"],
+          });
+          child_follower["data"].forEach((child) => {
+            if (!nodes.some((node) => node.id === child["login"])) {
+              const node_object = {
+                id: child["login"],
+                radius: 10,
+                depth: 3,
+                color:
+                  "rgb(" +
+                  Math.floor(Math.random() * 256) +
+                  ", " +
+                  Math.floor(Math.random() * 256) +
+                  ", " +
+                  Math.floor(Math.random() * 256) +
+                  ")",
+              };
+              nodes = nodes.concat(node_object);
+            }
+
+            const link = {
+              source: follower["login"],
+              target: child["login"],
+              distance: 100,
+            };
+
+            links = links.concat(link);
+          });
+
+          if (!nodes.some((node) => node.id === follower["login"])) {
             const node_object = {
-              id: child["login"],
+              id: follower["login"],
               radius: 10,
-              depth: 3,
+              depth: 2,
               color:
                 "rgb(" +
                 Math.floor(Math.random() * 256) +
@@ -173,65 +204,42 @@ class Form extends React.Component {
           }
 
           const link = {
-            source: follower["login"],
-            target: child["login"],
+            source: github_user["data"]["login"],
+            target: follower["login"],
             distance: 100,
           };
 
           links = links.concat(link);
+          this.setState({ nodes: nodes, links: links });
         });
 
-        if (!nodes.some((node) => node.id === follower["login"])) {
-          const node_object = {
-            id: follower["login"],
-            radius: 10,
-            depth: 2,
-            color:
-              "rgb(" +
-              Math.floor(Math.random() * 256) +
-              ", " +
-              Math.floor(Math.random() * 256) +
-              ", " +
-              Math.floor(Math.random() * 256) +
-              ")",
-          };
-          nodes = nodes.concat(node_object);
-        }
-
-        const link = {
-          source: github_user["data"]["login"],
-          target: follower["login"],
-          distance: 100,
-        };
-
-        links = links.concat(link);
-        this.setState({ nodes: nodes, links: links });
-      });
-
-      // Get Github Contributions
-      const github_user_contributions_request = await fetch(
-        "/api/contributions?user=" + input1,
-        {
-          method: "GET",
-        }
-      );
-      const github_user_contributions = await github_user_contributions_request.json();
-      github_user_contributions["data"]["user"]["contributionsCollection"][
-        "contributionCalendar"
-      ]["weeks"].forEach((week) => {
-        week["contributionDays"].forEach((day) => {
-          if (day["contributionCount"] > 0) {
-            const cal_object = {
-              day: day["date"],
-              value: day["contributionCount"],
-            };
-            var joined_cal = this.state.calendar_data.concat(cal_object);
-            this.setState({
-              calendar_data: joined_cal,
-            });
+        // Get Github Contributions
+        const github_user_contributions_request = await fetch(
+          "/api/contributions?user=" + input1,
+          {
+            method: "GET",
           }
+        );
+        const github_user_contributions = await github_user_contributions_request.json();
+        github_user_contributions["data"]["user"]["contributionsCollection"][
+          "contributionCalendar"
+        ]["weeks"].forEach((week) => {
+          week["contributionDays"].forEach((day) => {
+            if (day["contributionCount"] > 0) {
+              const cal_object = {
+                day: day["date"],
+                value: day["contributionCount"],
+              };
+              var joined_cal = this.state.calendar_data.concat(cal_object);
+              this.setState({
+                calendar_data: joined_cal,
+              });
+            }
+          });
         });
-      });
+      } catch (e) {
+        this.setState({ search_error: true });
+      }
     }
   }
 
@@ -288,12 +296,12 @@ class Form extends React.Component {
           </label>
           <input type="submit" value="Submit" />
         </form>
-        {this.state.user_img.length > 0 && (
+        {this.state.user_img.length > 0 && !this.state.search_error && (
           <div>
             <img src={this.state.user_img} />
           </div>
         )}
-        {this.state.pie_data.length > 0 && (
+        {this.state.pie_data.length > 0 && !this.state.search_error && (
           <div className={styles.pie_data}>
             <ResponsivePie
               data={this.state.pie_data}
@@ -337,7 +345,7 @@ class Form extends React.Component {
             />
           </div>
         )}
-        {this.state.calendar_data.length > 0 && (
+        {this.state.calendar_data.length > 0 && !this.state.search_error && (
           <div className={styles.contributions_data}>
             <h4>
               <select
@@ -382,7 +390,7 @@ class Form extends React.Component {
             />
           </div>
         )}
-        {this.state.nodes.length > 0 && (
+        {this.state.nodes.length > 0 && !this.state.search_error && (
           <div className={styles.network_data}>
             <h4>User Followers Connections at 2 degrees</h4>
             <ResponsiveNetwork
@@ -404,6 +412,11 @@ class Form extends React.Component {
               distanceMax={200}
               distanceMin={20}
             />
+          </div>
+        )}
+        {this.state.search_error && (
+          <div>
+            <h4>Error in search, try again</h4>
           </div>
         )}
       </div>
