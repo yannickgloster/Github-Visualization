@@ -1,6 +1,7 @@
 # Github Visualization tool
 
 Built by Yannick Gloster | `18308167`
+
 [Live Deployment](https://github-visualization.vercel.app/)
 
 This project is built in Javascript using the Next.JS Framework. It is being hosted through Vercel.
@@ -56,6 +57,8 @@ The search bar also has a set of presets that someone can use to see example of 
 Here is a card that gives an overview of a Github User's statistics and performance during the current year.
 ![User Info Card](/README/user-info-card.png)
 
+> Available ranks are S+ (top 1%), S (top 25%), A++ (top 45%), A+ (top 60%), and B+ (everyone). The values are calculated by using the cumulative distribution function using commits, contributions, issues, stars, pull requests, followers, and owned repositories.
+
 #### Productivity Hours Pie Chart
 
 People tend to be productive at different hours of the day and a good metric of understanding when one is most productive is by looking at when a user is most productive in terms of their Github activity. This data can be used by users to plan their schedules around when they know they will get the most amount of work done.
@@ -78,6 +81,36 @@ Another way to track users is through their interactions with other members on t
 
 ![Follower Node Graph](/README/follower-node.gif)
 
+#### List Repos
+
+All of the user's public repos have their own clickable info card.
+
+![User Repos](/README/repos.png)
+
 ### Repositories
 
-Not Implemented
+Here is a clickable card that gives an overview of a Github Repo's statistics.
+
+![User Info Card](/README/repo-info-card.png)
+
+#### Weekly Contributions over time
+
+This graph shows the number of lines of code added or removed per user per week.
+
+![Contributions over time](README/contributions-over-time.gif)
+
+#### Top 10 Contributors
+
+Shows the clickable info cards for the top 10 contributors in the repository ordered by who has contributed the most amount of lines.
+
+![10 Top Contributors](README/top-10-contributors.png)
+
+### Search
+
+#### Example User Search
+
+![User Search](README/user-search.gif)
+
+#### Search Error
+
+![Error in Search](README/search-error.gif)
