@@ -19,6 +19,7 @@ class Form extends React.Component {
       links: [],
       user_img: "",
       user_url: "",
+      user_repos: [],
       pie_data: [],
       line_data: [],
       contribution_year: new Date().getFullYear(),
@@ -85,6 +86,7 @@ class Form extends React.Component {
       links: [],
       user_img: "",
       repo_img: "",
+      user_repos: [],
       pie_data: [],
       repo_url: "",
       user_url: "",
@@ -149,6 +151,21 @@ class Form extends React.Component {
             pie[3]["value"] = pie[3]["value"] + 1;
           }
           this.setState({ pie_data: pie });
+        });
+
+        const user_repos = await octokit.paginate(
+          "GET /users/" + input1 + "/repos"
+        );
+
+        user_repos.forEach((repo) => {
+          const repo_data = {
+            username: repo["owner"]["login"],
+            name: repo["name"],
+            url: repo["html_url"],
+          };
+          this.setState({
+            user_repos: this.state.user_repos.concat(repo_data),
+          });
         });
 
         this.setState({
@@ -479,6 +496,29 @@ class Form extends React.Component {
             />
           </div>
         )}
+        {this.state.user_repos.length > 0 && !this.state.search_error && (
+          <div className={styles.repos}>
+            <h4>Repos</h4>
+            <br />
+            <div className={styles.repos_parent}>
+              {this.state.user_repos.map((repo) => (
+                <div className={styles.repos_image}>
+                  <a href={repo["url"]} target="_blank">
+                    <img
+                      src={
+                        "https://github-readme-stats.vercel.app/api/pin/?username=" +
+                        repo["username"] +
+                        "&repo=" +
+                        repo["name"]
+                      }
+                    />
+                  </a>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {this.state.repo_img.length > 0 && !this.state.search_error && (
           <div>
             <a href={this.state.repo_url} target="_blank">
