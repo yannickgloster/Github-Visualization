@@ -279,7 +279,6 @@ class Form extends React.Component {
       this.state.dropdown === "user+repo" ||
       preset_select === "user+repo"
     ) {
-      console.log("here");
       const octokit = new Octokit({
         auth: process.env.NEXT_PUBLIC_GITHUB_API_KEY,
       });
@@ -298,8 +297,33 @@ class Form extends React.Component {
           repo: input2,
         });
 
+        const contributors = await octokit.repos.getContributorsStats({
+          owner: input1,
+          repo: input2,
+        });
+
         this.setState({ repo_url: repo["data"]["html_url"] });
-        console.log(this.state.repo_url);
+
+        console.log(contributors);
+
+        contributors["data"].forEach((contributor) => {
+          let contributor_data = {
+            id: contributor["author"]["login"],
+            data: [],
+          };
+
+          contributor["weeks"].forEach((week) => {
+            if (week["c"] > 0) {
+              contributor_data["data"].push({
+                x: new Date(week["w"] * 1000).toISOString().split("T")[0],
+                y: week["a"] - week["d"],
+              });
+            }
+          });
+          this.setState({
+            line_data: this.state.line_data.concat(contributor_data),
+          });
+        });
       } catch (e) {
         this.setState({ search_error: true });
       }
@@ -524,6 +548,78 @@ class Form extends React.Component {
             <a href={this.state.repo_url} target="_blank">
               <img src={this.state.repo_img} />
             </a>
+          </div>
+        )}
+
+        {this.state.line_data.length > 0 && !this.state.search_error && (
+          <div className={styles.repo_contributions}>
+            <h4>User Contributions Over Time</h4>
+            <ResponsiveLine
+              data={this.state.line_data}
+              margin={{ top: 20, right: 20, bottom: 60, left: 80 }}
+              animate={true}
+              xScale={{
+                type: "time",
+                format: "%Y-%m-%d",
+                useUTC: true,
+                precision: "day",
+              }}
+              xFormat="time:%Y-%m-%d"
+              yScale={{
+                type: "linear",
+                stacked: false,
+                min: "auto",
+                max: "auto",
+              }}
+              colors={{ scheme: "set1" }}
+              axisLeft={{
+                legend: "linear scale",
+                legendOffset: 12,
+              }}
+              axisBottom={{
+                format: "%b %d",
+                legend: "time scale",
+                legendOffset: -12,
+                tickRotation: 90,
+              }}
+              legend="Date"
+              curve={"monotoneX"}
+              enablePointLabel={true}
+              pointSize={16}
+              pointBorderWidth={1}
+              pointBorderColor={{
+                from: "color",
+                modifiers: [["darker", 0.3]],
+              }}
+              useMesh={true}
+              enableSlices={false}
+              legends={[
+                {
+                  anchor: "bottom-right",
+                  direction: "column",
+                  justify: false,
+                  translateX: 100,
+                  translateY: 0,
+                  itemsSpacing: 0,
+                  itemDirection: "left-to-right",
+                  itemWidth: 80,
+                  itemHeight: 20,
+                  itemOpacity: 0.75,
+                  symbolSize: 12,
+                  symbolShape: "circle",
+                  symbolBorderColor: "rgba(0, 0, 0, .5)",
+                  effects: [
+                    {
+                      on: "hover",
+                      style: {
+                        itemBackground: "rgba(0, 0, 0, .03)",
+                        itemOpacity: 1,
+                      },
+                    },
+                  ],
+                },
+              ]}
+            />
           </div>
         )}
         {this.state.search_error && (
