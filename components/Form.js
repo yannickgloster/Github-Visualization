@@ -2,7 +2,7 @@ import React from "react";
 import { Octokit } from "@octokit/rest";
 import styles from "./Form.module.css";
 import { ResponsiveCalendar } from "@nivo/calendar";
-import { ResponsiveNetworkCanvas } from "@nivo/network";
+import { ResponsiveNetwork } from "@nivo/network";
 import { ResponsivePie } from "@nivo/pie";
 import { ResponsiveLineCanvas } from "@nivo/line";
 
@@ -406,7 +406,7 @@ class Form extends React.Component {
                   Pinaqui's GitHub Account
                 </option>
                 <option value="yannick+account+repo">
-                  Yannick's Discord-10man
+                  Yannick's Discord-10man Repo
                 </option>
               </select>
             )}
@@ -512,7 +512,7 @@ class Form extends React.Component {
         {this.state.nodes.length > 0 && !this.state.search_error && (
           <div className={styles.network_data}>
             <h4>User Followers Connections at 2 degrees</h4>
-            <ResponsiveNetworkCanvas
+            <ResponsiveNetwork
               nodes={this.state.nodes}
               links={this.state.links}
               margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
