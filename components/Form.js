@@ -64,7 +64,10 @@ class Form extends React.Component {
     let input1 = this.state.input1;
     let input2 = this.state.input2;
     if (this.state.dropdown === "presets") {
-      if (this.state.preset === "yannick+account") {
+      if (this.state.preset === "esjmb+account") {
+        input1 = "esjmb";
+        preset_select = "user";
+      } else if (this.state.preset === "yannick+account") {
         input1 = "yannickgloster";
         preset_select = "user";
       } else if (this.state.preset === "brian+account") {
@@ -76,6 +79,10 @@ class Form extends React.Component {
       } else if (this.state.preset === "yannick+account+repo") {
         input1 = "yannickgloster";
         input2 = "discord-10man";
+        preset_select = "user+repo";
+      } else if (this.state.preset == "lexesjan+account+repo") {
+        input1 = "lexesjan";
+        input2 = "vhdl-processor";
         preset_select = "user+repo";
       }
     }
@@ -398,6 +405,9 @@ class Form extends React.Component {
                 onChange={this.handlePresetDropdown}
                 className={styles.form_element}
               >
+                <option value="esjmb+account">
+                  Professor Stephen Barrett's GitHub Account
+                </option>
                 <option value="yannick+account">
                   Yannick's GitHub Account
                 </option>
@@ -407,6 +417,9 @@ class Form extends React.Component {
                 </option>
                 <option value="yannick+account+repo">
                   Yannick's Discord-10man Repo
+                </option>
+                <option value="lexesjan+account+repo">
+                  Lexes' vhdl-processor repo
                 </option>
               </select>
             )}
@@ -422,6 +435,7 @@ class Form extends React.Component {
         )}
         {this.state.pie_data.length > 0 && !this.state.search_error && (
           <div className={styles.pie_data}>
+            <h4>Activity Time Breakdown</h4>
             <ResponsivePie
               data={this.state.pie_data}
               margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
@@ -466,6 +480,7 @@ class Form extends React.Component {
         )}
         {this.state.calendar_data.length > 0 && !this.state.search_error && (
           <div className={styles.contributions_data}>
+            <br />
             <h4>
               <select
                 name="year"
@@ -511,6 +526,8 @@ class Form extends React.Component {
         )}
         {this.state.nodes.length > 0 && !this.state.search_error && (
           <div className={styles.network_data}>
+            <br />
+            <br />
             <h4>User Followers Connections at 2 degrees</h4>
             <ResponsiveNetwork
               nodes={this.state.nodes}
@@ -574,7 +591,7 @@ class Form extends React.Component {
 
         {this.state.line_data.length > 0 && !this.state.search_error && (
           <div className={styles.repo_contributions}>
-            <h4>User Contributions Over Time</h4>
+            <h4>Weekly User Contributions Over Time</h4>
             <ResponsiveLineCanvas
               data={this.state.line_data}
               margin={{ top: 20, right: 120, bottom: 60, left: 80 }}
@@ -603,7 +620,7 @@ class Form extends React.Component {
                 legendPosition: "middle",
               }}
               axisBottom={{
-                format: "%b %d %Y",
+                format: "%b %d %y",
                 legendOffset: -12,
                 tickRotation: 90,
               }}
