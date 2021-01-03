@@ -21,7 +21,7 @@ export default function Home() {
       </main>
 
       <footer className={styles.footer}>
-        v0.1.0 | Powered by{" "}
+        v0.2.0 | Powered by{" "}
         <a href="https://github.com" target="_blank" rel="noopener noreferrer">
           <img
             src="/github-octocat.svg"
