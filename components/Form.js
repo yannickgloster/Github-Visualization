@@ -683,7 +683,7 @@ class Form extends React.Component {
               <div className={styles.repos_parent}>
                 {this.state.repo_top_contributors.map((contributor) => (
                   <div className={styles.repos_image}>
-                    <a href={contributor["url"]} target="_blank">
+                    <a href={contributor["html_url"]} target="_blank">
                       <img
                         src={
                           "https://github-readme-stats.vercel.app/api?username=" +
