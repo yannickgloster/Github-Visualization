@@ -26,6 +26,8 @@ class Form extends React.Component {
       search_error: false,
       repo_img: "",
       repo_url: "",
+      repo_top_contributors: [],
+      top_contributors_error: false,
     };
 
     this.input1HandleChange = this.input1HandleChange.bind(this);
@@ -90,6 +92,8 @@ class Form extends React.Component {
       pie_data: [],
       repo_url: "",
       user_url: "",
+      repo_top_contributors: [],
+      top_contributors_error: false,
     });
 
     if (this.state.dropdown === "user" || preset_select === "user") {
@@ -325,6 +329,22 @@ class Form extends React.Component {
             line_data: this.state.line_data.concat(contributor_data),
           });
         });
+
+        try {
+          const sorted_contributions = await octokit.repos.listContributors({
+            owner: input1,
+            repo: input2,
+            per_page: 10,
+
+            q: "contributions",
+            order: "desc",
+          });
+          this.setState({
+            repo_top_contributors: sorted_contributions["data"],
+          });
+        } catch (e) {
+          this.setState({ top_contributors_error: true });
+        }
       } catch (e) {
         this.setState({ search_error: true });
       }
@@ -625,6 +645,40 @@ class Form extends React.Component {
             />
           </div>
         )}
+        {this.state.top_contributors_error && !this.state.search_error && (
+          <>
+            <br />
+            <br />
+            <h4>Top 10 Contributors by Code Commits</h4>
+            <p>
+              The history or contributor list is too large to list contributors
+              for this repository via the API.
+            </p>
+          </>
+        )}
+        {this.state.repo_top_contributors.length > 0 &&
+          !this.state.search_error && (
+            <div className={styles.repos}>
+              <br />
+              <br />
+              <h4>Top 10 Contributors by Code Commits</h4>
+
+              <div className={styles.repos_parent}>
+                {this.state.repo_top_contributors.map((contributor) => (
+                  <div className={styles.repos_image}>
+                    <a href={contributor["url"]} target="_blank">
+                      <img
+                        src={
+                          "https://github-readme-stats.vercel.app/api?username=" +
+                          contributor["login"]
+                        }
+                      />
+                    </a>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         {this.state.search_error && (
           <div>
             <h4>Error in search, try again.</h4>
