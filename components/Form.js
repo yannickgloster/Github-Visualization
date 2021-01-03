@@ -2,9 +2,9 @@ import React from "react";
 import { Octokit } from "@octokit/rest";
 import styles from "./Form.module.css";
 import { ResponsiveCalendar } from "@nivo/calendar";
-import { ResponsiveNetwork } from "@nivo/network";
+import { ResponsiveNetworkCanvas } from "@nivo/network";
 import { ResponsivePie } from "@nivo/pie";
-import { ResponsiveLine } from "@nivo/line";
+import { ResponsiveLineCanvas } from "@nivo/line";
 
 class Form extends React.Component {
   constructor(props) {
@@ -297,16 +297,17 @@ class Form extends React.Component {
           repo: input2,
         });
 
-        const contributors = await octokit.repos.getContributorsStats({
-          owner: input1,
-          repo: input2,
-        });
+        const contributors = await octokit.paginate(
+          "GET /repos/" + input1 + "/" + input2 + "/stats/contributors"
+        );
+
+        console.log(contributors);
 
         this.setState({ repo_url: repo["data"]["html_url"] });
 
         console.log(contributors);
 
-        contributors["data"].forEach((contributor) => {
+        contributors.forEach((contributor) => {
           let contributor_data = {
             id: contributor["author"]["login"],
             data: [],
@@ -491,7 +492,7 @@ class Form extends React.Component {
         {this.state.nodes.length > 0 && !this.state.search_error && (
           <div className={styles.network_data}>
             <h4>User Followers Connections at 2 degrees</h4>
-            <ResponsiveNetwork
+            <ResponsiveNetworkCanvas
               nodes={this.state.nodes}
               links={this.state.links}
               margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
@@ -554,9 +555,9 @@ class Form extends React.Component {
         {this.state.line_data.length > 0 && !this.state.search_error && (
           <div className={styles.repo_contributions}>
             <h4>User Contributions Over Time</h4>
-            <ResponsiveLine
+            <ResponsiveLineCanvas
               data={this.state.line_data}
-              margin={{ top: 20, right: 20, bottom: 60, left: 80 }}
+              margin={{ top: 20, right: 120, bottom: 60, left: 80 }}
               animate={true}
               xScale={{
                 type: "time",
@@ -573,18 +574,20 @@ class Form extends React.Component {
               }}
               colors={{ scheme: "set1" }}
               axisLeft={{
-                legend: "linear scale",
-                legendOffset: 12,
+                orient: "left",
+                tickSize: 5,
+                tickPadding: 5,
+                tickRotation: 0,
+                legend: "Lines of Code Additions",
+                legendOffset: -45,
+                legendPosition: "middle",
               }}
               axisBottom={{
-                format: "%b %d",
-                legend: "time scale",
+                format: "%b %d %Y",
                 legendOffset: -12,
                 tickRotation: 90,
               }}
-              legend="Date"
               curve={"monotoneX"}
-              enablePointLabel={true}
               pointSize={16}
               pointBorderWidth={1}
               pointBorderColor={{
@@ -624,7 +627,7 @@ class Form extends React.Component {
         )}
         {this.state.search_error && (
           <div>
-            <h4>Error in search, try again</h4>
+            <h4>Error in search, try again.</h4>
           </div>
         )}
       </div>
