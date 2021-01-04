@@ -16,6 +16,13 @@ export default function Home() {
         </h1>
 
         <div className={styles.description}>
+          <p className={styles.about}>
+            Read about the project{" "}
+            <a href="https://github.com/yannickgloster/Github-Visualization#github-visualization-tool">
+              here
+            </a>
+            .
+          </p>
           <UserForm />
         </div>
       </main>

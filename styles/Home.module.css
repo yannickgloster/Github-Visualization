@@ -118,6 +118,17 @@
   height: 1em;
 }
 
+.about a {
+  color: #0070f3;
+  text-decoration: none;
+}
+
+.about a:hover,
+.about a:focus,
+.about a:active {
+  text-decoration: underline;
+}
+
 @media (max-width: 600px) {
   .grid {
     width: 100%;
